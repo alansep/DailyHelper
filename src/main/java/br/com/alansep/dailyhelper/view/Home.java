@@ -3,6 +3,8 @@ package br.com.alansep.dailyhelper.view;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -18,9 +20,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import br.com.alansep.dailyhelper.model.Task;
 import br.com.alansep.dailyhelper.service.TaskService;
-import br.com.alansep.dailyhelper.service.UpdateBoxService;
-import java.awt.event.ItemListener;
-import java.awt.event.ItemEvent;
 
 public class Home extends JFrame {
 
@@ -94,8 +93,6 @@ public class Home extends JFrame {
 		});
 		comboBox.setBounds(10, 30, 279, 22);
 		panel.add(comboBox);
-		Thread comboBoxThread = new Thread(new UpdateBoxService(comboBox));
-		comboBoxThread.start();
 		springLayout.putConstraint(SpringLayout.WEST, comboBox, 340, SpringLayout.WEST, getContentPane());
 		springLayout.putConstraint(SpringLayout.EAST, comboBox, -323, SpringLayout.EAST, getContentPane());
 
