@@ -18,6 +18,7 @@ import javax.swing.SpringLayout;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+
 import br.com.alansep.dailyhelper.model.Task;
 import br.com.alansep.dailyhelper.service.TaskService;
 
@@ -86,12 +87,13 @@ public class Home extends JFrame {
 		comboBox = new JComboBox<Task>();
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				if(e.getStateChange() == 1) {
-					System.out.println(e.getItem());
+				if(e.getStateChange() == 1 && titleField != null && descriptionField != null) {
+					renderTask((Task) e.getItem());
 				}
 			}
 		});
 		comboBox.setBounds(10, 30, 279, 22);
+		comboBox.addItem(Task.builder().title("New Task").description("").build());
 		panel.add(comboBox);
 		springLayout.putConstraint(SpringLayout.WEST, comboBox, 340, SpringLayout.WEST, getContentPane());
 		springLayout.putConstraint(SpringLayout.EAST, comboBox, -323, SpringLayout.EAST, getContentPane());
@@ -146,10 +148,14 @@ public class Home extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				taskService.saveTask(
 						Task.builder().title(titleField.getText()).description(descriptionField.getText()).build(), comboBox);
-				titleField.setText("");
-				descriptionField.setText("");
+				renderTask(taskService.getTasks().get(taskService.getTasks().size() -1));
 			}
 		});
+	}
+
+	protected void renderTask(Task item) {
+		this.titleField.setText(item.getTitle());
+		this.descriptionField.setText(item.getDescription());
 	}
 
 	private void setStyle() {

@@ -18,7 +18,9 @@ public class TaskService {
 
 	public void saveTask(Task task, JComboBox<Task> combo) {
 		tasks.add(task);
-		combo.addItem(task);
+		combo.removeAllItems();
+		tasks.stream().forEach(savedTask -> combo.addItem(savedTask));
+		combo.addItem(Task.builder().title("New Task").build());
 	}
 	
 }
