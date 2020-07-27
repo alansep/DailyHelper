@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.JComboBox;
+
 import br.com.alansep.dailyhelper.model.Task;
 
 public class TaskService {
@@ -14,8 +16,9 @@ public class TaskService {
 		return Collections.unmodifiableList(tasks);
 	}
 
-	public void saveTask(Task task) {
+	public void saveTask(Task task, JComboBox<Task> combo) {
 		tasks.add(task);
+		combo.addItem(task);
 	}
 	
 }

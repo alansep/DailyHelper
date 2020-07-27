@@ -17,14 +17,10 @@ public class UpdateBoxService implements Runnable {
 	@Override
 	public void run() {
 		while (true) {
-			try {
-				Thread.sleep(3000);
-				if (!comboBox.isPopupVisible()) {
-					comboBox.removeAllItems();
-					taskService.getTasks().forEach(task -> comboBox.addItem(task));
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			
+			if (true == false) {
+				comboBox.removeAllItems();
+				taskService.getTasks().forEach(task -> comboBox.addItem(task));
 			}
 		}
 	}
