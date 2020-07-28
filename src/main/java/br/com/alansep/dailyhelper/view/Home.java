@@ -5,9 +5,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -17,7 +22,6 @@ import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-
 
 import br.com.alansep.dailyhelper.model.Task;
 import br.com.alansep.dailyhelper.service.TaskService;
@@ -29,6 +33,8 @@ public class Home extends JFrame {
 	private JTextArea descriptionField;
 	private TaskService taskService;
 	private JComboBox<Task> comboBox;
+	private Task screenTask;
+	private JButton createUpdateButton;
 
 	/**
 	 * Launch the application.
@@ -50,9 +56,9 @@ public class Home extends JFrame {
 	 * Create the frame.
 	 */
 	public Home() {
-		
+
 		setStyle();
-		
+
 		setTitle("Daily Helper");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -61,8 +67,6 @@ public class Home extends JFrame {
 		SpringLayout springLayout = new SpringLayout();
 		getContentPane().setLayout(springLayout);
 
-		
-		
 		JPanel panel = new JPanel();
 		springLayout.putConstraint(SpringLayout.NORTH, panel, 0, SpringLayout.NORTH, getContentPane());
 		springLayout.putConstraint(SpringLayout.WEST, panel, 0, SpringLayout.WEST, getContentPane());
@@ -87,7 +91,7 @@ public class Home extends JFrame {
 		comboBox = new JComboBox<Task>();
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				if(e.getStateChange() == 1 && titleField != null && descriptionField != null) {
+				if (e.getStateChange() == 1 && titleField != null && descriptionField != null) {
 					renderTask((Task) e.getItem());
 				}
 			}
@@ -98,7 +102,6 @@ public class Home extends JFrame {
 		springLayout.putConstraint(SpringLayout.WEST, comboBox, 340, SpringLayout.WEST, getContentPane());
 		springLayout.putConstraint(SpringLayout.EAST, comboBox, -323, SpringLayout.EAST, getContentPane());
 
-		
 		springLayout.putConstraint(SpringLayout.NORTH, comboBox, 18, SpringLayout.SOUTH, lblNewLabel_2);
 
 		JLabel lblNewLabel = new JLabel("Select a created task:");
@@ -116,6 +119,7 @@ public class Home extends JFrame {
 		titleField.setColumns(10);
 
 		descriptionField = new JTextArea();
+		descriptionField.setLineWrap(true);
 		descriptionField.setBounds(10, 174, 279, 245);
 		panel.add(descriptionField);
 		springLayout.putConstraint(SpringLayout.WEST, descriptionField, 372, SpringLayout.WEST, getContentPane());
@@ -132,30 +136,56 @@ public class Home extends JFrame {
 		springLayout.putConstraint(SpringLayout.NORTH, separator, 5, SpringLayout.SOUTH, descriptionField);
 
 		JButton btnNewButton_1 = new JButton("Generate Report");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.showSaveDialog(null);
+				String fileName = fileChooser.getSelectedFile().getAbsoluteFile().getAbsolutePath();
+				if(!fileName.contains(".txt")) {
+					fileName = fileName + ".txt";
+				}
+					BufferedWriter arquivo;
+					try {
+						arquivo = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName)));
+						arquivo.write(taskService.generateReport());
+						arquivo.close();
+					} catch (IOException exception) {
+						exception.printStackTrace();
+					}
+				
+			}
+		});
 		btnNewButton_1.setBounds(155, 443, 134, 23);
 		panel.add(btnNewButton_1);
 		springLayout.putConstraint(SpringLayout.WEST, btnNewButton_1, 462, SpringLayout.WEST, getContentPane());
 		springLayout.putConstraint(SpringLayout.EAST, btnNewButton_1, -339, SpringLayout.EAST, getContentPane());
 		springLayout.putConstraint(SpringLayout.NORTH, btnNewButton_1, 21, SpringLayout.SOUTH, separator);
 
-		JButton btnNewButton = new JButton("Add Task");
-		btnNewButton.setBounds(10, 443, 134, 23);
-		panel.add(btnNewButton);
-		springLayout.putConstraint(SpringLayout.NORTH, btnNewButton, 471, SpringLayout.NORTH, getContentPane());
-		springLayout.putConstraint(SpringLayout.WEST, btnNewButton, 353, SpringLayout.WEST, getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, btnNewButton, 479, SpringLayout.WEST, getContentPane());
-		btnNewButton.addActionListener(new ActionListener() {
+		createUpdateButton = new JButton("Add Task");
+		createUpdateButton.setBounds(10, 443, 134, 23);
+		panel.add(createUpdateButton);
+		springLayout.putConstraint(SpringLayout.NORTH, createUpdateButton, 471, SpringLayout.NORTH, getContentPane());
+		springLayout.putConstraint(SpringLayout.WEST, createUpdateButton, 353, SpringLayout.WEST, getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, createUpdateButton, 479, SpringLayout.WEST, getContentPane());
+		createUpdateButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				taskService.saveTask(
-						Task.builder().title(titleField.getText()).description(descriptionField.getText()).build(), comboBox);
-				renderTask(taskService.getTasks().get(taskService.getTasks().size() -1));
+				Task newTask = Task.builder().title(titleField.getText()).description(descriptionField.getText())
+						.build();
+				if (screenTask != null) {
+					newTask.setId(screenTask.getId());
+				}
+				taskService.saveTask(newTask, comboBox);
+				renderTask(TaskService.getEmptyTask());
 			}
 		});
 	}
 
 	protected void renderTask(Task item) {
-		this.titleField.setText(item.getTitle());
-		this.descriptionField.setText(item.getDescription());
+		this.screenTask = item;
+		this.titleField.setText(screenTask.getTitle());
+		this.descriptionField.setText(screenTask.getDescription());
+		comboBox.setSelectedItem(item);
+		createUpdateButton.setText(item.getId() != null ? "Update Task" : "Add Task");
 	}
 
 	private void setStyle() {
