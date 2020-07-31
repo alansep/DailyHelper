@@ -1,18 +1,7 @@
 package br.com.alansep.dailyhelper.view;
 
-import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -24,37 +13,25 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import br.com.alansep.dailyhelper.model.Task;
-import br.com.alansep.dailyhelper.service.TaskService;
+import br.com.alansep.dailyhelper.model.enums.Period;
+import lombok.Getter;
 
+@Getter
 public class Home extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private JTextField titleField;
-	private JTextArea descriptionField;
-	private TaskService taskService;
-	private JComboBox<Task> comboBox;
+	private JTextField taskTitleTextbox;
+	private JTextArea taskDescriptionTextArea;
+	private JComboBox<Task> taskComboBox;
 	private Task screenTask;
 	private JButton createUpdateButton;
+	private JComboBox<Period> taskPeriodCombobox;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Home frame = new Home();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+	
+	private void initializeFields() {
+
 	}
-
-	/**
-	 * Create the frame.
-	 */
+	
 	public Home() {
 
 		setStyle();
@@ -63,7 +40,6 @@ public class Home extends JFrame {
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 319, 522);
-		taskService = new TaskService();
 		SpringLayout springLayout = new SpringLayout();
 		getContentPane().setLayout(springLayout);
 
@@ -75,91 +51,64 @@ public class Home extends JFrame {
 		getContentPane().add(panel);
 		panel.setLayout(null);
 
-		JLabel lblNewLabel_1 = new JLabel("Task Title");
-		lblNewLabel_1.setBounds(10, 75, 279, 14);
-		panel.add(lblNewLabel_1);
-		springLayout.putConstraint(SpringLayout.WEST, lblNewLabel_1, 448, SpringLayout.WEST, getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, lblNewLabel_1, -433, SpringLayout.EAST, getContentPane());
+		JLabel taskTitleLabel = new JLabel("Task Title");
+		taskTitleLabel.setBounds(10, 75, 279, 14);
+		panel.add(taskTitleLabel);
+		springLayout.putConstraint(SpringLayout.WEST, taskTitleLabel, 448, SpringLayout.WEST, getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, taskTitleLabel, -433, SpringLayout.EAST, getContentPane());
 
-		JLabel lblNewLabel_2 = new JLabel("Task Description");
-		lblNewLabel_2.setBounds(10, 149, 279, 14);
-		panel.add(lblNewLabel_2);
-		springLayout.putConstraint(SpringLayout.SOUTH, lblNewLabel_2, -427, SpringLayout.SOUTH, getContentPane());
-		springLayout.putConstraint(SpringLayout.WEST, lblNewLabel_2, 467, SpringLayout.WEST, getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, lblNewLabel_2, -374, SpringLayout.EAST, getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, lblNewLabel_1, -6, SpringLayout.NORTH, lblNewLabel_2);
-		comboBox = new JComboBox<Task>();
-		comboBox.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == 1 && titleField != null && descriptionField != null) {
-					renderTask((Task) e.getItem());
-				}
-			}
-		});
-		comboBox.setBounds(10, 30, 279, 22);
-		comboBox.addItem(Task.builder().title("New Task").description("").build());
-		panel.add(comboBox);
-		springLayout.putConstraint(SpringLayout.WEST, comboBox, 340, SpringLayout.WEST, getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, comboBox, -323, SpringLayout.EAST, getContentPane());
+		JLabel taskDescriptionLabel = new JLabel("Task Description");
+		taskDescriptionLabel.setBounds(10, 149, 279, 14);
+		panel.add(taskDescriptionLabel);
+		springLayout.putConstraint(SpringLayout.SOUTH, taskDescriptionLabel, -427, SpringLayout.SOUTH, getContentPane());
+		springLayout.putConstraint(SpringLayout.WEST, taskDescriptionLabel, 467, SpringLayout.WEST, getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, taskDescriptionLabel, -374, SpringLayout.EAST, getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, taskTitleLabel, -6, SpringLayout.NORTH, taskDescriptionLabel);
+		taskComboBox = new JComboBox<Task>();
+		taskComboBox.setBounds(10, 30, 279, 22);
+		panel.add(taskComboBox);
+		springLayout.putConstraint(SpringLayout.WEST, taskComboBox, 340, SpringLayout.WEST, getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, taskComboBox, -323, SpringLayout.EAST, getContentPane());
 
-		springLayout.putConstraint(SpringLayout.NORTH, comboBox, 18, SpringLayout.SOUTH, lblNewLabel_2);
+		springLayout.putConstraint(SpringLayout.NORTH, taskComboBox, 18, SpringLayout.SOUTH, taskDescriptionLabel);
 
-		JLabel lblNewLabel = new JLabel("Select a created task:");
-		lblNewLabel.setBounds(10, 11, 632, 14);
-		panel.add(lblNewLabel);
-		springLayout.putConstraint(SpringLayout.WEST, lblNewLabel, 295, SpringLayout.WEST, getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, lblNewLabel, 0, SpringLayout.EAST, getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, lblNewLabel, -225, SpringLayout.SOUTH, getContentPane());
+		JLabel taskComboBoxLabel = new JLabel("Select a created task:");
+		taskComboBoxLabel.setBounds(10, 11, 279, 14);
+		panel.add(taskComboBoxLabel);
+		springLayout.putConstraint(SpringLayout.WEST, taskComboBoxLabel, 295, SpringLayout.WEST, getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, taskComboBoxLabel, 0, SpringLayout.EAST, getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, taskComboBoxLabel, -225, SpringLayout.SOUTH, getContentPane());
 
-		titleField = new JTextField();
-		titleField.setBounds(10, 97, 279, 20);
-		panel.add(titleField);
-		springLayout.putConstraint(SpringLayout.WEST, titleField, 360, SpringLayout.WEST, getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, titleField, -303, SpringLayout.EAST, getContentPane());
-		titleField.setColumns(10);
+		taskTitleTextbox = new JTextField();
+		taskTitleTextbox.setBounds(10, 97, 279, 20);
+		panel.add(taskTitleTextbox);
+		springLayout.putConstraint(SpringLayout.WEST, taskTitleTextbox, 360, SpringLayout.WEST, getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, taskTitleTextbox, -303, SpringLayout.EAST, getContentPane());
+		taskTitleTextbox.setColumns(10);
 
-		descriptionField = new JTextArea();
-		descriptionField.setLineWrap(true);
-		descriptionField.setBounds(10, 174, 279, 245);
-		panel.add(descriptionField);
-		springLayout.putConstraint(SpringLayout.WEST, descriptionField, 372, SpringLayout.WEST, getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, descriptionField, -291, SpringLayout.EAST, getContentPane());
-		springLayout.putConstraint(SpringLayout.NORTH, descriptionField, 157, SpringLayout.NORTH, getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, descriptionField, 402, SpringLayout.NORTH, getContentPane());
+		taskDescriptionTextArea = new JTextArea();
+		taskDescriptionTextArea.setLineWrap(true);
+		taskDescriptionTextArea.setBounds(10, 174, 279, 192);
+		panel.add(taskDescriptionTextArea);
+		springLayout.putConstraint(SpringLayout.WEST, taskDescriptionTextArea, 372, SpringLayout.WEST, getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, taskDescriptionTextArea, -291, SpringLayout.EAST, getContentPane());
+		springLayout.putConstraint(SpringLayout.NORTH, taskDescriptionTextArea, 157, SpringLayout.NORTH, getContentPane());
+		springLayout.putConstraint(SpringLayout.SOUTH, taskDescriptionTextArea, 402, SpringLayout.NORTH, getContentPane());
 
 		JSeparator separator = new JSeparator();
 		separator.setBounds(-10, 430, 315, 2);
 		panel.add(separator);
 		springLayout.putConstraint(SpringLayout.WEST, separator, 398, SpringLayout.WEST, getContentPane());
 		springLayout.putConstraint(SpringLayout.EAST, separator, -245, SpringLayout.EAST, getContentPane());
-		springLayout.putConstraint(SpringLayout.SOUTH, titleField, -138, SpringLayout.NORTH, separator);
-		springLayout.putConstraint(SpringLayout.NORTH, separator, 5, SpringLayout.SOUTH, descriptionField);
+		springLayout.putConstraint(SpringLayout.SOUTH, taskTitleTextbox, -138, SpringLayout.NORTH, separator);
+		springLayout.putConstraint(SpringLayout.NORTH, separator, 5, SpringLayout.SOUTH, taskDescriptionTextArea);
 
-		JButton btnNewButton_1 = new JButton("Generate Report");
-		btnNewButton_1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fileChooser = new JFileChooser();
-				fileChooser.showSaveDialog(null);
-				String fileName = fileChooser.getSelectedFile().getAbsoluteFile().getAbsolutePath();
-				if(!fileName.contains(".txt")) {
-					fileName = fileName + ".txt";
-				}
-					BufferedWriter arquivo;
-					try {
-						arquivo = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName)));
-						arquivo.write(taskService.generateReport());
-						arquivo.close();
-					} catch (IOException exception) {
-						exception.printStackTrace();
-					}
-				
-			}
-		});
-		btnNewButton_1.setBounds(155, 443, 134, 23);
-		panel.add(btnNewButton_1);
-		springLayout.putConstraint(SpringLayout.WEST, btnNewButton_1, 462, SpringLayout.WEST, getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, btnNewButton_1, -339, SpringLayout.EAST, getContentPane());
-		springLayout.putConstraint(SpringLayout.NORTH, btnNewButton_1, 21, SpringLayout.SOUTH, separator);
+		JButton generateReportButton = new JButton("Generate Report");
+		generateReportButton.setBounds(155, 443, 134, 23);
+		panel.add(generateReportButton);
+		springLayout.putConstraint(SpringLayout.WEST, generateReportButton, 462, SpringLayout.WEST, getContentPane());
+		springLayout.putConstraint(SpringLayout.EAST, generateReportButton, -339, SpringLayout.EAST, getContentPane());
+		springLayout.putConstraint(SpringLayout.NORTH, generateReportButton, 21, SpringLayout.SOUTH, separator);
 
 		createUpdateButton = new JButton("Add Task");
 		createUpdateButton.setBounds(10, 443, 134, 23);
@@ -167,25 +116,16 @@ public class Home extends JFrame {
 		springLayout.putConstraint(SpringLayout.NORTH, createUpdateButton, 471, SpringLayout.NORTH, getContentPane());
 		springLayout.putConstraint(SpringLayout.WEST, createUpdateButton, 353, SpringLayout.WEST, getContentPane());
 		springLayout.putConstraint(SpringLayout.EAST, createUpdateButton, 479, SpringLayout.WEST, getContentPane());
-		createUpdateButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				Task newTask = Task.builder().title(titleField.getText()).description(descriptionField.getText())
-						.build();
-				if (screenTask != null) {
-					newTask.setId(screenTask.getId());
-				}
-				taskService.saveTask(newTask, comboBox);
-				renderTask(TaskService.getEmptyTask());
-			}
-		});
-	}
-
-	protected void renderTask(Task item) {
-		this.screenTask = item;
-		this.titleField.setText(screenTask.getTitle());
-		this.descriptionField.setText(screenTask.getDescription());
-		comboBox.setSelectedItem(item);
-		createUpdateButton.setText(item.getId() != null ? "Update Task" : "Add Task");
+		
+		JLabel taskPeriodLabel = new JLabel("Period");
+		taskPeriodLabel.setBounds(10, 377, 46, 14);
+		panel.add(taskPeriodLabel);
+		
+		taskPeriodCombobox = new JComboBox<Period>();
+		taskPeriodCombobox.setBounds(10, 397, 279, 22);
+		panel.add(taskPeriodCombobox);
+	
+		initializeFields();
 	}
 
 	private void setStyle() {

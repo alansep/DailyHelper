@@ -1,7 +1,7 @@
 package br.com.alansep.dailyhelper.model;
 
-import java.time.LocalDateTime;
 
+import br.com.alansep.dailyhelper.model.enums.Period;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,10 +14,9 @@ import lombok.Setter;
 public class Task {
 	
 	private Byte id;
-	private LocalDateTime startTime;
-	private LocalDateTime endTime;
 	private String title;
 	private String description;
+	private Period period;
 	
 	@Override
 	public String toString() {
